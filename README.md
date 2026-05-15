@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 🧠 AdaptiveMind
 
 **Behavior-Adaptive AI Support That Learns from Every Interaction**
