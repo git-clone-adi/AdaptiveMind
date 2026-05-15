@@ -325,7 +325,7 @@ This is a demo/MVP project. To extend:
 
 ## 📄 License
 
-[Your License Here]
+Apache-2.0 
 
 ## 🙋 Support & Questions
 
