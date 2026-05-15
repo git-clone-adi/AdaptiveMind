@@ -1,0 +1,52 @@
+[
+  {
+    "id": "technical-printer",
+    "userType": "technical",
+    "category": "printer",
+    "message": "My printer's spooler keeps crashing. Error: 0x80070005. Already tried clearing PRINTERS folder.",
+    "expectedTechnicalLevel": 85,
+    "expectedFrustration": 30,
+    "expectedStyle": "concise",
+    "expectedResponse": "Run PowerShell command to restart spooler service and check event logs"
+  },
+  {
+    "id": "nontechnical-network",
+    "userType": "non-technical",
+    "category": "network",
+    "message": "My internet is down. I can't get online at all. What do I do???",
+    "expectedTechnicalLevel": 15,
+    "expectedFrustration": 65,
+    "expectedStyle": "step-by-step",
+    "expectedResponse": "Step-by-step guide: restart router, check connection"
+  },
+  {
+    "id": "coldstart-generic",
+    "userType": "unknown",
+    "category": "general",
+    "message": "I have a problem",
+    "expectedTechnicalLevel": 0,
+    "expectedFrustration": 0,
+    "expectedStyle": "detailed",
+    "expectedResponse": "Preference detection question"
+  },
+  {
+    "id": "technical-database",
+    "userType": "technical",
+    "category": "database",
+    "message": "Query timeout on large table join. Need execution plan and index recommendations. Schema: products (500M rows) LEFT JOIN orders (2B rows).",
+    "expectedTechnicalLevel": 90,
+    "expectedFrustration": 20,
+    "expectedStyle": "concise",
+    "expectedResponse": "Direct SQL optimization recommendations"
+  },
+  {
+    "id": "frustrated-user",
+    "userType": "frustrated",
+    "category": "general",
+    "message": "THIS SYSTEM NEVER WORKS!!! I'VE TRIED EVERYTHING AND NOTHING HELPS!!!",
+    "expectedTechnicalLevel": 10,
+    "expectedFrustration": 95,
+    "expectedStyle": "calm-reassuring",
+    "expectedResponse": "Empathetic response with immediate escalation option"
+  }
+]

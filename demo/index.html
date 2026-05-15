@@ -1,0 +1,1652 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdaptiveMind - Behavior-Adaptive AI Support</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cream:    #FFF9D2;
+            --peach:    #FFEBCC;
+            --sky:      #BFDDF0;
+            --blue:     #8CC0EB;
+
+            --bg-primary:   var(--cream);
+            --bg-secondary: var(--peach);
+            --bg-tertiary:  #FFF1B0;
+            --bg-card:      rgba(255, 255, 255, 0.75);
+
+            --text-primary:   #2d3748;
+            --text-secondary: #4a5568;
+            --text-muted:     #718096;
+
+            --accent-primary:   var(--blue);
+            --accent-secondary: #6aaade;
+            --accent-glow:      rgba(140, 192, 235, 0.35);
+
+            --success: #38a169;
+            --warning: #d69e2e;
+            --error:   #e53e3e;
+
+            --border:  rgba(140, 192, 235, 0.4);
+            --radius:  16px;
+            --shadow:  0 4px 24px rgba(140, 192, 235, 0.2);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ── Layout ── */
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 370px;
+            height: 100vh;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border);
+            padding: 22px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--blue) transparent;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 5px; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 4px; }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-header h2 { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+
+        /* ── Connection status ── */
+        .connection-status {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .status-indicator.connected    { background: var(--success); box-shadow: 0 0 8px var(--success); }
+        .status-indicator.disconnected { background: var(--error);   box-shadow: 0 0 8px var(--error); }
+        .status-indicator.connecting   { background: var(--warning); animation: pulse 1.5s infinite; }
+
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+        .status-text { font-size: 0.82rem; color: var(--text-secondary); }
+        .status-text.connected    { color: var(--success); }
+        .status-text.disconnected { color: var(--error); }
+        .status-text.connecting   { color: var(--warning); }
+
+        /* ── Radar ── */
+        .radar-section {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px;
+        }
+        .radar-section h3 { font-size: 0.85rem; font-weight: 600; margin-bottom: 14px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .5px; }
+        .radar-container { position: relative; width: 100%; aspect-ratio: 1; max-width: 260px; margin: 0 auto; }
+        .radar-canvas { width: 100%; height: 100%; }
+
+        /* ── Stats grid ── */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .stat-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 10px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: var(--accent-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .stat-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 3px; }
+
+        /* ── Style badge ── */
+        .style-badge {
+            background: linear-gradient(135deg, var(--sky), var(--blue));
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+        }
+        .style-badge .label { font-size: 0.72rem; color: rgba(45,55,72,0.75); margin-bottom: 5px; }
+        .style-badge .value { font-size: 1.1rem; font-weight: 700; color: #1a365d; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* ── Topics ── */
+        .topics-section {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px;
+        }
+        .topics-section h3 { font-size: 0.85rem; font-weight: 600; margin-bottom: 10px; color: var(--text-secondary); }
+        .topic-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+        .topic-tag {
+            background: var(--sky);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 0.73rem;
+            color: #1a365d;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        /* ── Reset btn ── */
+        .reset-btn {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 11px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.83rem;
+            font-weight: 500;
+            transition: all .2s;
+            margin-top: auto;
+        }
+        .reset-btn:hover { background: #fff5f5; border-color: var(--error); color: var(--error); }
+
+        /* ── Main chat ── */
+        .chat-main {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ── Header ── */
+        .chat-header {
+            background: var(--peach);
+            border-bottom: 1px solid var(--border);
+            padding: 18px 26px;
+            flex-shrink: 0;
+        }
+        .chat-header-content { display: flex; align-items: center; justify-content: space-between; }
+
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand-icon {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--sky), var(--blue));
+            border-radius: 13px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+        .brand-text h1 {
+            font-size: 1.3rem; font-weight: 700;
+            color: #1a365d;
+        }
+        .brand-text p { font-size: 0.78rem; color: var(--text-muted); }
+
+        .header-stats { display: flex; gap: 24px; }
+        .header-stat { text-align: center; }
+        .header-stat .num {
+            font-size: 1.15rem; font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-secondary);
+        }
+        .header-stat .txt { font-size: 0.68rem; color: var(--text-muted); }
+
+        /* ── Examples bar ── */
+        .examples-bar {
+            display: flex;
+            gap: 8px;
+            padding: 12px 26px;
+            background: var(--peach);
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            flex-shrink: 0;
+            scrollbar-width: none;
+        }
+        .examples-bar::-webkit-scrollbar { display: none; }
+
+        .example-chip {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 25px;
+            padding: 7px 16px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all .2s;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .example-chip:hover {
+            background: var(--blue);
+            border-color: var(--blue);
+            color: #1a365d;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px var(--accent-glow);
+        }
+
+        /* ── Messages ── */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 22px 26px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--blue) transparent;
+        }
+        .messages-container::-webkit-scrollbar { width: 6px; }
+        .messages-container::-webkit-scrollbar-track { background: transparent; }
+        .messages-container::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 4px; }
+
+        .message-wrapper {
+            display: flex; gap: 10px;
+            max-width: 84%;
+            animation: fadeIn 0.25s ease;
+        }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+        .message-wrapper.user { align-self: flex-end; flex-direction: row-reverse; }
+
+        .message-avatar {
+            width: 34px; height: 34px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; flex-shrink: 0;
+        }
+        .message-wrapper.ai   .message-avatar { background: linear-gradient(135deg, var(--sky), var(--blue)); }
+        .message-wrapper.user .message-avatar { background: var(--peach); border: 1px solid var(--border); }
+
+        .message-content { flex: 1; }
+
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 16px;
+            line-height: 1.65;
+            font-size: 0.88rem;
+        }
+        .message-wrapper.ai .message-bubble {
+            background: white;
+            border: 1px solid var(--border);
+            border-top-left-radius: 4px;
+            color: var(--text-primary);
+            box-shadow: 0 2px 8px rgba(140,192,235,.12);
+        }
+        .message-wrapper.user .message-bubble {
+            background: linear-gradient(135deg, var(--sky), var(--blue));
+            color: #1a365d;
+            border-top-right-radius: 4px;
+            font-weight: 500;
+        }
+
+        .message-bubble code {
+            background: rgba(0,0,0,.07);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .84em;
+        }
+        .message-bubble pre {
+            background: rgba(0,0,0,.06);
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 8px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .83em;
+            scrollbar-width: thin;
+            scrollbar-color: var(--blue) transparent;
+        }
+        .message-wrapper.user .message-bubble pre { background: rgba(255,255,255,.35); }
+
+        .message-meta {
+            display: flex; gap: 8px; flex-wrap: wrap;
+            margin-top: 7px; padding-left: 2px;
+        }
+        .meta-tag {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            background: var(--cream);
+            border: 1px solid var(--border);
+            padding: 3px 9px;
+            border-radius: 20px;
+        }
+
+        /* ── Typing indicator ── */
+        .typing-indicator { display: flex; gap: 10px; align-items: flex-start; }
+        .typing-dots {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            border-top-left-radius: 4px;
+            padding: 14px 18px;
+            display: flex; gap: 5px;
+            box-shadow: 0 2px 8px rgba(140,192,235,.12);
+        }
+        .typing-dots span {
+            width: 7px; height: 7px;
+            background: var(--blue);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        .typing-dots span:nth-child(2) { animation-delay: .2s; }
+        .typing-dots span:nth-child(3) { animation-delay: .4s; }
+        @keyframes typing {
+            0%,60%,100% { transform:translateY(0); opacity:.4; }
+            30%          { transform:translateY(-7px); opacity:1; }
+        }
+
+        /* ── Input area ── */
+        .input-area {
+            padding: 16px 26px;
+            background: var(--peach);
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .input-container {
+            display: flex; gap: 10px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 6px;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .input-container:focus-within {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+        .input-container input {
+            flex: 1; background: transparent; border: none; outline: none;
+            padding: 10px 14px; font-size: 0.92rem;
+            color: var(--text-primary); font-family: 'Inter', sans-serif;
+        }
+        .input-container input::placeholder { color: var(--text-muted); }
+
+        .send-btn {
+            background: linear-gradient(135deg, var(--sky), var(--blue));
+            border: none; color: #1a365d;
+            width: 44px; height: 44px;
+            border-radius: 11px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            transition: all .2s;
+            font-weight: 700;
+        }
+        .send-btn:hover { transform: scale(1.06); box-shadow: 0 4px 16px var(--accent-glow); }
+        .send-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+        .input-hint {
+            text-align: center; font-size: 0.72rem;
+            color: var(--text-muted); margin-top: 8px;
+        }
+
+        /* ── Welcome ── */
+        .welcome-message { text-align: center; padding: 40px 20px; }
+        .welcome-icon { font-size: 2.8rem; margin-bottom: 14px; }
+        .welcome-message h2 { font-size: 1.25rem; margin-bottom: 8px; color: var(--text-primary); }
+        .welcome-message p {
+            color: var(--text-secondary); font-size: 0.88rem;
+            max-width: 480px; margin: 0 auto; line-height: 1.65;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .app-container { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+
+    <!-- Main Chat 
+    <div class="chat-main">
+        <div class="chat-header">
+            <div class="chat-header-content">
+                <div class="brand">
+                    <div class="brand-icon">🧠</div>
+                    <div class="brand-text">
+                        <h1>AdaptiveMind</h1>
+                        <p>Behavior-adaptive AI support</p>
+                    </div>
+                </div>
+                <div class="header-stats">
+                    <div class="header-stat">
+                        <div class="num" id="msgCount">0</div>
+                        <div class="txt">Messages</div>
+                    </div>
+                    <div class="header-stat">
+                        <div class="num" id="techScore">--</div>
+                        <div class="txt">Tech Level</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="examples-bar">
+            <button class="example-chip" onclick="sendExample('tech')"><span>💻</span> Technical User</button>
+            <button class="example-chip" onclick="sendExample('novice')"><span>🌱</span> New User</button>
+            <button class="example-chip" onclick="sendExample('frustrated')"><span>😤</span> Frustrated User</button>
+            <button class="example-chip" onclick="sendExample('printer')"><span>🖨️</span> Printer Issue</button>
+            <button class="example-chip" onclick="sendExample('network')"><span>🌐</span> Network Problem</button>
+            <button class="example-chip" onclick="sendExample('slow')"><span>🐌</span> Slow Computer</button>
+        </div>
+
+        <div class="messages-container" id="messagesContainer">
+            <div class="welcome-message">
+                <div class="welcome-icon">👋</div>
+                <h2>Welcome to AdaptiveMind</h2>
+                <p>I adapt my communication style based on how you interact with me.
+                   Try sending a message to see how I respond differently based on your
+                   technical level, frustration, and communication preferences.</p>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="input-container">
+                <input type="text" id="messageInput" placeholder="Describe your IT issue..." autocomplete="off">
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+            </div>
+            <div class="input-hint">Your responses shape how I communicate with you • Powered by Llama 3.2</div>
+        </div>
+    </div>
+
+    <!-- Sidebar 
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>📊 User Profile</h2>
+        </div>
+
+        <div class="connection-status" id="connectionStatus">
+            <div class="status-indicator connecting" id="statusDot"></div>
+            <div class="status-text connecting" id="statusText">Checking connection…</div>
+        </div>
+
+        <div class="radar-section">
+            <h3>Behavior Analysis</h3>
+            <div class="radar-container">
+                <canvas class="radar-canvas" id="radarCanvas" width="260" height="260"></canvas>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="techStat">0</div>
+                <div class="stat-label">Technical</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="frustStat">0</div>
+                <div class="stat-label">Frustration</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="formStat">0</div>
+                <div class="stat-label">Formal</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="patientStat">100</div>
+                <div class="stat-label">Patience</div>
+            </div>
+        </div>
+
+        <div class="style-badge">
+            <div class="label">Response Style</div>
+            <div class="value" id="styleValue">DETAILED</div>
+        </div>
+
+        <div class="topics-section">
+            <h3>🎯 Detected Topics</h3>
+            <div class="topic-tags" id="topicTags">
+                <span class="topic-tag" style="opacity:.5">No topics yet</span>
+            </div>
+        </div>
+
+        <button class="reset-btn" onclick="resetSession()">🔄 Reset Profile</button>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'https://localhost:5001';
+    const userId = crypto.randomUUID ? crypto.randomUUID() : 'user-' + Date.now();
+
+    let isConnected = false;
+    let messageCount = 0;
+    let currentProfile = { technical: 0, frustration: 0, formality: 0, patience: 100, style: 'detailed', topics: [] };
+
+    const messagesContainer = document.getElementById('messagesContainer');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    checkConnection();
+    drawRadar({ Technical: 0, Patient: 100, Calm: 100, Formal: 0, 'Hands-on': 50 });
+
+    async function checkConnection() {
+        const dot  = document.getElementById('statusDot');
+        const text = document.getElementById('statusText');
+        try {
+            const r = await fetch(`${API_BASE}/api/status`);
+            if (r.ok) { const d = await r.json(); isConnected = d.connected; }
+        } catch { isConnected = false; }
+        dot.className  = `status-indicator ${isConnected ? 'connected' : 'disconnected'}`;
+        text.className = `status-text ${isConnected ? 'connected' : 'disconnected'}`;
+        text.textContent = isConnected ? 'Connected to Colab Ollama' : 'Offline (fallback mode)';
+    }
+
+    async function sendMessage() {
+        const message = messageInput.value.trim();
+        if (!message) return;
+        messageInput.value = '';
+        sendBtn.disabled = true;
+        messageCount++;
+        const welcome = document.querySelector('.welcome-message');
+        if (welcome) welcome.remove();
+        addMessage(message, 'user');
+        showTyping();
+
+        if (isConnected) {
+            try {
+                const r = await fetch(`${API_BASE}/api/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, message })
+                });
+                if (r.ok) {
+                    const data = await r.json();
+                    removeTyping();
+                    addMessage(data.response, 'ai', {
+                        tech: data.technicalLevel, frustration: data.frustration,
+                        formality: data.formality,  style: data.preferredStyle, topic: data.detectedTopic
+                    });
+                    updateProfile(data);
+                    return;
+                }
+            } catch { console.log('API error, fallback'); }
+        }
+
+        removeTyping();
+        const fb = getFallbackResponse(message);
+        addMessage(fb.response, 'ai', fb.meta);
+        updateProfile(fb.profile);
+    }
+
+    function addMessage(text, type, meta = null) {
+        const wrapper = document.createElement('div');
+        wrapper.className = `message-wrapper ${type}`;
+
+        const avatar = document.createElement('div');
+        avatar.className = 'message-avatar';
+        avatar.textContent = type === 'ai' ? '🤖' : '👤';
+
+        const content = document.createElement('div');
+        content.className = 'message-content';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble';
+        bubble.innerHTML = formatMessage(text);
+        content.appendChild(bubble);
+
+        if (meta && type === 'ai') {
+            const m = document.createElement('div');
+            m.className = 'message-meta';
+            m.innerHTML = `
+                <span class="meta-tag">🎯 Tech: ${meta.tech || 0}</span>
+                <span class="meta-tag">😤 Frustration: ${meta.frustration || 0}</span>
+                <span class="meta-tag">📋 Style: ${meta.style || 'detailed'}</span>
+                ${meta.topic ? `<span class="meta-tag">🏷️ ${meta.topic}</span>` : ''}
+            `;
+            content.appendChild(m);
+        }
+
+        wrapper.appendChild(avatar);
+        wrapper.appendChild(content);
+        messagesContainer.appendChild(wrapper);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function formatMessage(text) {
+        return text
+            .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+    }
+
+    function showTyping() {
+        const t = document.createElement('div');
+        t.className = 'typing-indicator'; t.id = 'typingIndicator';
+        t.innerHTML = `
+            <div class="message-avatar" style="background:linear-gradient(135deg,#BFDDF0,#8CC0EB)">🤖</div>
+            <div class="typing-dots"><span></span><span></span><span></span></div>
+        `;
+        messagesContainer.appendChild(t);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function removeTyping() {
+        const t = document.getElementById('typingIndicator');
+        if (t) t.remove();
+    }
+
+    function updateProfile(data) {
+        currentProfile = {
+            technical:   data.technicalLevel || currentProfile.technical,
+            frustration: data.frustration    || currentProfile.frustration,
+            formality:   data.formality      || currentProfile.formality,
+            patience:    100 - (data.frustration || 0),
+            style:       data.preferredStyle || currentProfile.style,
+            topics:      [...new Set([...currentProfile.topics, data.detectedTopic].filter(Boolean))]
+        };
+        document.getElementById('msgCount').textContent    = messageCount;
+        document.getElementById('techScore').textContent   = currentProfile.technical;
+        document.getElementById('techStat').textContent    = currentProfile.technical;
+        document.getElementById('frustStat').textContent   = currentProfile.frustration;
+        document.getElementById('formStat').textContent    = currentProfile.formality;
+        document.getElementById('patientStat').textContent = currentProfile.patience;
+        document.getElementById('styleValue').textContent  = currentProfile.style.toUpperCase();
+
+        const tags = document.getElementById('topicTags');
+        if (currentProfile.topics.length > 0)
+            tags.innerHTML = currentProfile.topics.map(t => `<span class="topic-tag">${t}</span>`).join('');
+
+        drawRadar(getRadarData());
+    }
+
+    function getRadarData() {
+        return {
+            Technical:   currentProfile.technical,
+            Patient:     currentProfile.patience,
+            Calm:        100 - currentProfile.frustration,
+            Formal:      currentProfile.formality,
+            'Hands-on':  Math.min(100, currentProfile.technical + 20)
+        };
+    }
+
+    function drawRadar(data) {
+        const canvas = document.getElementById('radarCanvas');
+        const ctx = canvas.getContext('2d');
+        const size = 260, center = size / 2, radius = 95;
+        const labels = Object.keys(data), values = Object.values(data);
+        const sides = labels.length, angleStep = (Math.PI * 2) / sides;
+
+        ctx.clearRect(0, 0, size, size);
+
+        const gridColor   = 'rgba(140,192,235,0.25)';
+        const fillColor   = 'rgba(140,192,235,0.3)';
+        const strokeColor = '#8CC0EB';
+        const textColor   = '#4a5568';
+
+        // Grid circles
+        for (let i = 1; i <= 4; i++) {
+            ctx.beginPath();
+            ctx.arc(center, center, radius * (i / 4), 0, Math.PI * 2);
+            ctx.strokeStyle = gridColor; ctx.lineWidth = 1; ctx.stroke();
+        }
+        // Grid lines
+        for (let i = 0; i < sides; i++) {
+            const angle = i * angleStep - Math.PI / 2;
+            ctx.beginPath();
+            ctx.moveTo(center, center);
+            ctx.lineTo(center + radius * Math.cos(angle), center + radius * Math.sin(angle));
+            ctx.strokeStyle = gridColor; ctx.stroke();
+        }
+        // Data polygon
+        ctx.beginPath();
+        for (let i = 0; i < sides; i++) {
+            const angle = i * angleStep - Math.PI / 2;
+            const v = values[i] / 100;
+            const x = center + radius * v * Math.cos(angle);
+            const y = center + radius * v * Math.sin(angle);
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = fillColor; ctx.fill();
+        ctx.strokeStyle = strokeColor; ctx.lineWidth = 2; ctx.stroke();
+
+        // Data points
+        for (let i = 0; i < sides; i++) {
+            const angle = i * angleStep - Math.PI / 2;
+            const v = values[i] / 100;
+            ctx.beginPath();
+            ctx.arc(center + radius * v * Math.cos(angle), center + radius * v * Math.sin(angle), 4, 0, Math.PI * 2);
+            ctx.fillStyle = strokeColor; ctx.fill();
+        }
+
+        // Labels
+        ctx.font = '11px Inter, sans-serif'; ctx.fillStyle = textColor;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        for (let i = 0; i < sides; i++) {
+            const angle = i * angleStep - Math.PI / 2;
+            const lr = radius + 24;
+            ctx.fillText(labels[i], center + lr * Math.cos(angle), center + lr * Math.sin(angle));
+        }
+    }
+
+    function getFallbackResponse(message) {
+        const lower = message.toLowerCase();
+        const techTerms = ['error','0x','powershell','cmd','registry','api','sql','debug','code','command','terminal','spooler','ipconfig'];
+        let techScore = 0;
+        techTerms.forEach(t => { if (lower.includes(t)) techScore += 18; });
+        if (/\b0x[0-9a-f]+\b/i.test(message)) techScore += 25;
+        techScore = Math.min(100, techScore);
+
+        let frustration = 0;
+        if (message.includes('!!!') || message === message.toUpperCase()) frustration += 40;
+        ['never','always','useless','broken','stupid'].forEach(t => { if (lower.includes(t)) frustration += 20; });
+        frustration = Math.min(100, frustration);
+
+        const style = techScore > 70 ? 'concise' : (techScore > 40 ? 'detailed' : 'step-by-step');
+        let topic = 'general', response = '';
+
+        if (lower.includes('printer') || lower.includes('print') || lower.includes('spooler')) {
+            topic = 'printer';
+            if (techScore > 70) {
+                response = "Run in elevated PowerShell:\n```\nRestart-Service Spooler -Force\nRemove-Item C:\\Windows\\System32\\spool\\PRINTERS\\* -Force\nRestart-Service Spooler\n```";
+            } else if (techScore > 40) {
+                response = "**Fix printer spooler issue:**\n\n1. Open Services (Win+R → `services.msc`)\n2. Find 'Print Spooler'\n3. Right-click → Restart\n4. If still failing, clear the print queue";
+            } else {
+                response = "**Let's fix your printer step by step:**\n\n**Step 1:** Press Windows key + R\n**Step 2:** Type `services.msc` and press Enter\n**Step 3:** Scroll down to find 'Print Spooler'\n**Step 4:** Right-click it and select 'Restart'\n**Step 5:** Wait 30 seconds\n**Step 6:** Try printing again\n\nStill not working? Let me know!";
+            }
+        } else if (lower.includes('internet') || lower.includes('wifi') || lower.includes('network') || lower.includes('online')) {
+            topic = 'network';
+            if (techScore > 70) {
+                response = "```\nipconfig /release\nipconfig /renew\nipconfig /flushdns\nping 8.8.8.8\ntracert 8.8.8.8\n```\nCheck router logs if packets drop after hop 1.";
+            } else if (techScore > 40) {
+                response = "**Network troubleshooting:**\n\n1. Restart your router (unplug 30s)\n2. Run `ipconfig /renew` in CMD\n3. Disable/enable your network adapter\n4. Check if other devices have the same issue";
+            } else {
+                response = "**Let's get your internet working:**\n\n**Step 1:** Find your router and unplug it from power\n**Step 2:** Wait 30 seconds (count slowly!)\n**Step 3:** Plug it back in\n**Step 4:** Wait 2 minutes for it to fully start\n**Step 5:** Restart your computer\n**Step 6:** Try opening a website\n\nDoes this help?";
+            }
+        } else if (lower.includes('slow') || lower.includes('lag') || lower.includes('freeze') || lower.includes('hang')) {
+            topic = 'performance';
+            response = "**Performance fixes:**\n\n1. Press Ctrl+Shift+Esc to open Task Manager\n2. Click 'CPU' column to sort by usage\n3. Close any programs using high CPU/Memory\n4. Restart your computer\n5. Check Windows Update for driver updates";
+        } else if (lower.includes('password') || lower.includes('login') || lower.includes('sign in') || lower.includes('locked')) {
+            topic = 'authentication';
+            response = "**Account access help:**\n\n1. Click 'Forgot Password' on the login page\n2. Check your email (including spam) for reset link\n3. Create a new password following the requirements\n4. If locked out, contact IT support for manual unlock";
+        } else {
+            if (messageCount === 1) {
+                response = `I'd be happy to help with: "${message.substring(0, 80)}${message.length > 80 ? '...' : ''}"\n\nCould you provide more details?\n- What exactly happens?\n- Any error messages?\n- When did this start?\n\n💡 Do you prefer **direct fixes** or **step-by-step guidance**?`;
+            } else {
+                response = `Thanks for the details. Based on what you've shared, I recommend:\n1. Restart the affected application/computer\n2. Check if the issue occurs in other contexts\n3. Look for any recent changes or updates\n\nCan you tell me more specifically what you're trying to accomplish?`;
+            }
+        }
+
+        if (frustration > 60) response = "I understand this is frustrating. Let's get this resolved quickly.\n\n" + response;
+
+        return {
+            response,
+            meta:    { tech: techScore, frustration, formality: 0, style, topic },
+            profile: { technicalLevel: techScore, frustration, formality: 0, preferredStyle: style, detectedTopic: topic }
+        };
+    }
+
+    function sendExample(type) {
+        const examples = {
+            tech:      "Printer spooler keeps crashing with error 0x80070005. Already cleared PRINTERS folder. Need the actual fix, not basic steps.",
+            novice:    "Hi, I'm having trouble with my computer. I don't really know much about computers but something seems wrong. Can you help me?",
+            frustrated:"THIS SYSTEM NEVER WORKS!!! I'VE BEEN TRYING FOR HOURS AND NOTHING HAPPENS!!! FIX THIS NOW!!!",
+            printer:   "My printer won't print anything. The light is blinking but nothing comes out.",
+            network:   "I can't connect to the internet at all. The wifi icon shows connected but no websites load.",
+            slow:      "My computer has become really slow lately. It takes forever to open anything and keeps freezing."
+        };
+        messageInput.value = examples[type];
+        sendMessage();
+    }
+
+    async function resetSession() {
+        try { await fetch(`${API_BASE}/api/session/${userId}`, { method: 'DELETE' }); } catch {}
+        messageCount = 0;
+        currentProfile = { technical: 0, frustration: 0, formality: 0, patience: 100, style: 'detailed', topics: [] };
+        messagesContainer.innerHTML = `
+            <div class="welcome-message">
+                <div class="welcome-icon">👋</div>
+                <h2>Welcome to AdaptiveMind</h2>
+                <p>I adapt my communication style based on how you interact with me. Try sending a message to see how I respond differently.</p>
+            </div>
+        `;
+        document.getElementById('msgCount').textContent    = '0';
+        document.getElementById('techScore').textContent   = '--';
+        document.getElementById('techStat').textContent    = '0';
+        document.getElementById('frustStat').textContent   = '0';
+        document.getElementById('formStat').textContent    = '0';
+        document.getElementById('patientStat').textContent = '100';
+        document.getElementById('styleValue').textContent  = 'DETAILED';
+        document.getElementById('topicTags').innerHTML     = '<span class="topic-tag" style="opacity:.5">No topics yet</span>';
+        drawRadar({ Technical: 0, Patient: 100, Calm: 100, Formal: 0, 'Hands-on': 50 });
+    }
+
+    messageInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+    messageInput.addEventListener('input',    ()  => { sendBtn.disabled = !messageInput.value.trim(); });
+</script>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdaptiveMind - Enterprise Support Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --border: #334155;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ================= LOGIN SCREEN ================= */
+        .login-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        .login-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .login-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+        .login-logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .login-logo .icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 12px;
+        }
+        .login-logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .login-logo p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+        .login-btn:hover { background: var(--accent-hover); }
+        .login-error {
+            color: var(--error);
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 12px;
+            display: none;
+        }
+
+        /* ================= ADMIN PANEL (Hidden) ================= */
+        .admin-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .admin-overlay.active { display: flex; }
+        .admin-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+        }
+        .admin-header h2 { font-size: 1.4rem; color: var(--text-primary); }
+        .close-admin {
+            background: var(--bg-tertiary);
+            border: none;
+            color: var(--text-primary);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .admin-card {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .admin-card h3 {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .big-stat {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+        .stat-row span:first-child { color: var(--text-secondary); }
+        .stat-row span:last-child { color: var(--text-primary); font-weight: 600; }
+        .radar-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            max-width: 250px;
+            margin: 0 auto;
+        }
+        .radar-canvas { width: 100%; height: 100%; }
+
+        /* ================= CHAT INTERFACE ================= */
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            height: 100vh;
+        }
+        
+        .chat-header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header-logo {
+            font-size: 1.5rem;
+        }
+        .header-info h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .header-info p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .icon-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .icon-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        .status-pill {
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .status-pill::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        .messages-container::-webkit-scrollbar { width: 6px; }
+        .messages-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        .message-wrapper {
+            display: flex;
+            gap: 12px;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .message-wrapper.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        .message-wrapper.ai .message-avatar { background: var(--accent); color: white; }
+        .message-wrapper.user .message-avatar { background: var(--bg-tertiary); }
+        
+        .message-bubble {
+            padding: 16px 20px;
+            border-radius: 20px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        .message-wrapper.ai .message-bubble {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-top-left-radius: 4px;
+        }
+        .message-wrapper.user .message-bubble {
+            background: var(--accent);
+            color: white;
+            border-top-right-radius: 4px;
+        }
+        .message-bubble code {
+            background: rgba(0,0,0,0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+        }
+        .message-wrapper.user .message-bubble code { background: rgba(255,255,255,0.2); }
+
+        .typing-indicator {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .typing-dots {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            border-top-left-radius: 4px;
+            padding: 16px 20px;
+            display: flex;
+            gap: 6px;
+        }
+        .typing-dots span {
+            width: 8px; height: 8px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        .input-area {
+            padding: 20px 24px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+        }
+        .input-container {
+            display: flex;
+            gap: 12px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 8px;
+            transition: border-color 0.2s;
+        }
+        .input-container:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+        }
+        .input-container input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 12px 16px;
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+        }
+        .input-container input::placeholder { color: var(--text-muted); }
+        .send-btn {
+            background: var(--accent);
+            border: none;
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: background 0.2s;
+        }
+        .send-btn:hover { background: var(--accent-hover); }
+        .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .admin-grid { grid-template-columns: 1fr; }
+            .message-wrapper { max-width: 95%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================= LOGIN SCREEN ================= -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-card">
+            <div class="login-logo">
+                <span class="icon">🧠</span>
+                <h1>AdaptiveMind</h1>
+                <p>Enterprise Intelligent Support</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="emailInput">Corporate Email</label>
+                    <input type="email" id="emailInput" placeholder="firstname.lastname@cognizant.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="nameInput">Full Name</label>
+                    <input type="text" id="nameInput" placeholder="John Doe" required>
+                </div>
+                <button type="submit" class="login-btn">Access Support Portal</button>
+                <div class="login-error" id="loginError">Please use a valid corporate email address.</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= ADMIN PANEL (Hidden from user) ================= -->
+    <div class="admin-overlay" id="adminOverlay">
+        <div class="admin-panel">
+            <div class="admin-header">
+                <h2>🔒 Agent Behavior Analytics</h2>
+                <button class="close-admin" onclick="toggleAdmin()">✕</button>
+            </div>
+            <div style="margin-bottom: 20px; padding: 12px; background: var(--bg-primary); border-radius: 8px;">
+                <span style="color: var(--text-muted); font-size: 0.85rem;">👤 User: </span>
+                <span style="color: var(--text-primary); font-weight: 600;" id="adminUserName">-</span>
+                <span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 20px;">✉️ Email: </span>
+                <span style="color: var(--text-primary); font-weight: 600;" id="adminUserEmail">-</span>
+            </div>
+            <div class="admin-grid">
+                <div class="admin-card">
+                    <h3>Interaction Stats</h3>
+                    <div class="big-stat" id="adminMsgCount">0</div>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">Total Messages</p>
+                    <div class="stat-row" style="margin-top: 16px;">
+                        <span>Detected Topic</span>
+                        <span id="adminTopic">General</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Response Style Applied</span>
+                        <span id="adminStyle">Detailed</span>
+                    </div>
+                </div>
+                <div class="admin-card">
+                    <h3>Behavior Metrics</h3>
+                    <div class="stat-row">
+                        <span>Technical Level</span>
+                        <span id="adminTech">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Frustration Index</span>
+                        <span id="adminFrustration">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Patience Level</span>
+                        <span id="adminPatience">100</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Formality</span>
+                        <span id="adminFormal">0</span>
+                    </div>
+                </div>
+                <div class="admin-card" style="grid-column: span 2;">
+                    <h3>Cognitive Profile Map</h3>
+                    <div class="radar-container">
+                        <canvas class="radar-canvas" id="adminRadarCanvas" width="250" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= CHAT INTERFACE ================= -->
+    <div class="app-container">
+        <div class="chat-header">
+            <div class="header-left">
+                <div class="header-logo">🧠</div>
+                <div class="header-info">
+                    <h1>AdaptiveMind Support</h1>
+                    <p id="headerSubtext">How can I help you today?</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="status-pill" id="statusPill">System Online</div>
+                <!-- Secret Admin Button (Invisible to normal users) -->
+                <button class="icon-btn" onclick="toggleAdmin()" title="Agent Tools">📊</button>
+                <button class="icon-btn" onclick="handleLogout()" title="Logout">🚪</button>
+            </div>
+        </div>
+
+        <div class="messages-container" id="messagesContainer"></div>
+
+        <div class="input-area">
+            <div class="input-container">
+                <input type="text" id="messageInput" placeholder="Type your issue or question..." autocomplete="off">
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+        
+        // State
+        let currentUser = null;
+        let sessionId = null;
+        let messageCount = 0;
+        let adminData = { tech: 0, frustration: 0, formal: 0, patience: 100, style: 'detailed', topic: 'general' };
+        let isConnected = false;
+
+        // DOM Elements
+        const loginScreen = document.getElementById('loginScreen');
+        const loginForm = document.getElementById('loginForm');
+        const messagesContainer = document.getElementById('messagesContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        // Check API Status on load
+        checkConnection();
+
+        // ================= LOGIN LOGIC =================
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('emailInput').value.trim();
+            const name = document.getElementById('nameInput').value.trim();
+            const errorDiv = document.getElementById('loginError');
+
+            // Relaxed email validation for demo purposes
+            if (!email.includes('@')) {
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            errorDiv.style.display = 'none';
+            currentUser = { name, email };
+            sessionId = crypto.randomUUID ? crypto.randomUUID() : 'session-' + Date.now();
+            
+            // Transition to chat
+            loginScreen.classList.add('hidden');
+            document.getElementById('headerSubtext').textContent = `Session for ${name}`;
+            document.getElementById('adminUserName').textContent = name;
+            document.getElementById('adminUserEmail').textContent = email;
+            
+            // Trigger AI Welcome Message
+            triggerAIWelcome(name);
+        });
+
+        function triggerAIWelcome(name) {
+            // The AI generates a natural welcome based on the user starting the session
+            addMessage(`Hello ${name.split(' ')[0]}, welcome to IT support. I'm here to help resolve any technical issues you're experiencing today.\n\nTo get started, could you briefly describe what you're working on or what problem you're running into?`, 'ai');
+        }
+
+        function handleLogout() {
+            loginScreen.classList.remove('hidden');
+            messagesContainer.innerHTML = '';
+            currentUser = null;
+            messageCount = 0;
+            adminData = { tech: 0, frustration: 0, formal: 0, patience: 100, style: 'detailed', topic: 'general' };
+            document.getElementById('loginForm').reset();
+        }
+
+        // ================= CHAT LOGIC =================
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            messageInput.value = '';
+            sendBtn.disabled = true;
+            messageCount++;
+
+            addMessage(text, 'user');
+            showTyping();
+
+            if (isConnected) {
+                try {
+                    const response = await fetch(`${API_BASE}/api/chat`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            userId: sessionId, 
+                            message: text,
+                            userName: currentUser?.name 
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        removeTyping();
+                        addMessage(data.response, 'ai');
+                        updateAdminPanel(data);
+                        return;
+                    }
+                } catch (e) {
+                    console.error("API Error, using fallback", e);
+                }
+            }
+
+            // Fallback logic if API is down
+            removeTyping();
+            const fallback = getSmartFallback(text);
+            addMessage(fallback.response, 'ai');
+            updateAdminPanel(fallback.meta);
+        }
+
+        function addMessage(text, type) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `message-wrapper ${type}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = type === 'ai' ? '🤖' : '👤';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            // Simple markdown parsing
+            bubble.innerHTML = text
+                .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+
+            wrapper.appendChild(avatar);
+            wrapper.appendChild(bubble);
+            messagesContainer.appendChild(wrapper);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showTyping() {
+            const typing = document.createElement('div');
+            typing.className = 'typing-indicator';
+            typing.id = 'typingIndicator';
+            typing.innerHTML = `
+                <div class="message-avatar" style="background: var(--accent); color: white;">🤖</div>
+                <div class="typing-dots"><span></span><span></span><span></span></div>
+            `;
+            messagesContainer.appendChild(typing);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function removeTyping() {
+            const el = document.getElementById('typingIndicator');
+            if (el) el.remove();
+        }
+
+        // ================= ADMIN PANEL LOGIC =================
+        function toggleAdmin() {
+            const overlay = document.getElementById('adminOverlay');
+            overlay.classList.toggle('active');
+            if (overlay.classList.contains('active')) drawRadar();
+        }
+
+        function updateAdminPanel(data) {
+            adminData.tech = data.technicalLevel || adminData.tech;
+            adminData.frustration = data.frustration || adminData.frustration;
+            adminData.formal = data.formality || adminData.formal;
+            adminData.patience = 100 - adminData.frustration;
+            adminData.style = data.preferredStyle || adminData.style;
+            adminData.topic = data.detectedTopic || adminData.topic;
+
+            document.getElementById('adminMsgCount').textContent = messageCount;
+            document.getElementById('adminTech').textContent = adminData.tech;
+            document.getElementById('adminFrustration').textContent = adminData.frustration;
+            document.getElementById('adminPatience').textContent = adminData.patience;
+            document.getElementById('adminFormal').textContent = adminData.formal;
+            document.getElementById('adminTopic').textContent = adminData.topic.charAt(0).toUpperCase() + adminData.topic.slice(1);
+            document.getElementById('adminStyle').textContent = adminData.style.charAt(0).toUpperCase() + adminData.style.slice(1);
+
+            drawRadar();
+        }
+
+        function drawRadar() {
+            const canvas = document.getElementById('adminRadarCanvas');
+            const ctx = canvas.getContext('2d');
+            const size = 250;
+            const center = size / 2;
+            const radius = 90;
+            const labels = ['Technical', 'Patient', 'Calm', 'Formal', 'Hands-on'];
+            const values = [adminData.tech, adminData.patience, (100-adminData.frustration), adminData.formal, Math.min(100, adminData.tech + 20)];
+            const sides = 5;
+            const step = (Math.PI * 2) / sides;
+
+            ctx.clearRect(0, 0, size, size);
+
+            // Grid
+            for (let i = 1; i <= 4; i++) {
+                ctx.beginPath();
+                ctx.arc(center, center, radius * (i / 4), 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+                ctx.stroke();
+            }
+            for (let i = 0; i < sides; i++) {
+                const angle = i * step - Math.PI / 2;
+                ctx.beginPath();
+                ctx.moveTo(center, center);
+                ctx.lineTo(center + radius * Math.cos(angle), center + radius * Math.sin(angle));
+                ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+                ctx.stroke();
+            }
+
+            // Data
+            ctx.beginPath();
+            for (let i = 0; i < sides; i++) {
+                const angle = i * step - Math.PI / 2;
+                const x = center + (radius * (values[i]/100)) * Math.cos(angle);
+                const y = center + (radius * (values[i]/100)) * Math.sin(angle);
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
+            ctx.fill();
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Labels
+            ctx.font = '11px Inter';
+            ctx.fillStyle = '#94a3b8';
+            ctx.textAlign = 'center';
+            for (let i = 0; i < sides; i++) {
+                const angle = i * step - Math.PI / 2;
+                const x = center + (radius + 20) * Math.cos(angle);
+                const y = center + (radius + 20) * Math.sin(angle);
+                ctx.fillText(labels[i], x, y);
+            }
+        }
+
+        // ================= FALLBACK (Offline) =================
+        function getSmartFallback(msg) {
+            const lower = msg.toLowerCase();
+            const techTerms = ['error', '0x', 'powershell', 'cmd', 'sql', 'api', 'spooler'];
+            let tech = techTerms.reduce((acc, t) => lower.includes(t) ? acc + 18 : acc, 0);
+            let frust = (msg === msg.toUpperCase() && msg.length > 5) ? 40 : 0;
+            let style = tech > 70 ? 'concise' : (tech > 40 ? 'detailed' : 'step-by-step');
+            
+            return {
+                response: "I understand you're experiencing an issue. Our AI backend is currently starting up. Please try again in 30 seconds, or describe your issue in detail so I can log it for an agent.",
+                meta: { technicalLevel: tech, frustration: frust, formality: 0, preferredStyle: style, detectedTopic: 'general' }
+            };
+        }
+
+        // ================= UTILITIES =================
+        async function checkConnection() {
+            try {
+                const res = await fetch(`${API_BASE}/api/status`);
+                if (res.ok) {
+                    const data = await res.json();
+                    isConnected = data.connected;
+                }
+            } catch (e) { isConnected = false; }
+            
+            const pill = document.getElementById('statusPill');
+            if (isConnected) {
+                pill.style.background = 'rgba(16, 185, 129, 0.1)';
+                pill.style.color = 'var(--success)';
+                pill.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                pill.innerHTML = '<span style="display:inline-block;width:8px;height:8px;background:var(--success);border-radius:50%;margin-right:6px;"></span> AI Online';
+            } else {
+                pill.style.background = 'rgba(239, 68, 68, 0.1)';
+                pill.style.color = 'var(--error)';
+                pill.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                pill.innerHTML = '<span style="display:inline-block;width:8px;height:8px;background:var(--error);border-radius:50%;margin-right:6px;"></span> AI Offline';
+            }
+        }
+
+        // Event Listeners
+        messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+        messageInput.addEventListener('input', () => { sendBtn.disabled = !messageInput.value.trim(); });
+    </script>
+</body>
+</html>

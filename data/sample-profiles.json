@@ -1,0 +1,32 @@
+[
+  {
+    "userId": "550e8400-e29b-41d4-a716-446655440001",
+    "username": "john.tech",
+    "technicalLevel": 85,
+    "frustrationTendency": 20,
+    "patienceLevel": 80,
+    "preferredStyle": "concise",
+    "messageCount": 12,
+    "lastUpdated": "2026-05-14T10:30:00Z"
+  },
+  {
+    "userId": "550e8400-e29b-41d4-a716-446655440002",
+    "username": "sarah.admin",
+    "technicalLevel": 65,
+    "frustrationTendency": 35,
+    "patienceLevel": 65,
+    "preferredStyle": "detailed",
+    "messageCount": 8,
+    "lastUpdated": "2026-05-13T14:15:00Z"
+  },
+  {
+    "userId": "550e8400-e29b-41d4-a716-446655440003",
+    "username": "mike.user",
+    "technicalLevel": 20,
+    "frustrationTendency": 60,
+    "patienceLevel": 40,
+    "preferredStyle": "step-by-step",
+    "messageCount": 5,
+    "lastUpdated": "2026-05-12T09:45:00Z"
+  }
+]
